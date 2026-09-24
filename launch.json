@@ -1,0 +1,27 @@
+{
+  "kind": "univ4_hook",
+  "hook": {
+    "contract": "PvPadHook",
+    "constructorArgs": [
+      "0xE03A1074c86CFeDd5C142C4F04F1a1536e203543"
+    ],
+    "permissions": [
+      "beforeSwap",
+      "afterSwap",
+      "beforeSwapReturnDelta"
+    ]
+  },
+  "token": {
+    "contract": "PVP",
+    "name": "Pepe Values Pepe",
+    "symbol": "PVP",
+    "decimals": 18
+  },
+  "pool": {
+    "pairedCurrency": "0x0000000000000000000000000000000000000000",
+    "fee": 3000,
+    "tickSpacing": 60,
+    "initialPrice": "79228162514264337593543950336000"
+  },
+  "notes": "PvPad v3 one-shot launch for Sepolia (chain selection and policy are set by the services, not here). Hook: src/PvPadHook.sol:PvPadHook, a single contract implementing IHooks and IUnlockCallback directly (no BaseHook). Its constructor takes exactly one argument, IPoolManager manager, so constructorArgs is the one literal address of the Uniswap v4 PoolManager on Sepolia (0xE03A1074c86CFeDd5C142C4F04F1a1536e203543) named by the approved workflow; the constructor stores it, sets updater and claimPrice from source constants, and calls Hooks.validateHookPermissions, so it reverts at any CREATE2 address whose low 14 bits are not exactly 0xC8 (decimal 200). Permissions are what getHookPermissions returns: beforeSwap, afterSwap, beforeSwapReturnDelta, all eleven other flags false. There is no beforeInitialize or afterInitialize, so the launch factory can call PoolManager.initialize with itself as sender (the launch-138 WrappedError 0x90bfb865 cannot recur) and can seed ordinary v4 liquidity; the hook never intercepts liquidity or donations. Every enabled callback and unlockCallback checks msg.sender == poolManager; the disabled callbacks revert for everyone. Economics are compile-time constants in the hook source: FEE_BPS = 100 (1% of the specified currency of each swap, returned as a beforeSwap delta and taken in afterSwap after checking the swap filled completely, then pushed to the current King's beneficiary with a pullable credit fallback), INITIAL_CLAIM_PRICE = 0.01 ether and BUMP_BPS = 1000 for claimKing(beneficiary) (100% of each bid goes to the internal worker pot; the previous King is not paid), and INITIAL_UPDATER = 0x5b95A971B4583A5f011E9DA082acdD679b870D06 (may only setEpoch Merkle roots for the pot and hand over its role in two steps). No owner, mint, pause, upgrade, DELEGATECALL, SELFDESTRUCT or house cut. Token: src/PVP.sol:PVP, self-contained ERC-20 with a zero-argument constructor that mints 10^27 minor units (1,000,000,000 PVP at 18 decimals) to msg.sender, i.e. the factory; burn only, no further mint path. Supply split, allocations, treasury and contributor lock are the launch policy's and are intentionally absent here. Pool: currency0 = native ETH (pairedCurrency zero address), currency1 = PVP, fee 3000 (0.3% LP fee, static), tickSpacing 60, the pair rehearsed in test/utils/Fixture.sol. initialPrice is sqrtPriceX96 = 1000 * 2^96 = 79228162514264337593543950336000, i.e. 1,000,000 PVP per ETH (tick 138162), the opening price used by test/FactoryLaunch.t.sol; the hook itself does not constrain price, fee or spacing. Toolchain in foundry.toml: solc 0.8.26, EVM cancun, optimizer 200 runs, via_ir false, bytecode_hash none, cbor_metadata false; hook creation code is the compiled initcode plus one ABI word for the PoolManager. ABIs: docs/abi/PvPadHook.json and docs/abi/PVP.json. Reproduce offline: forge test (all suites, including the factory-shaped initialize simulation) and forge inspect src/PvPadHook.sol:PvPadHook abi."
+}
