@@ -1,0 +1,26 @@
+[
+  {
+    "repository": "Uniswap/v4-core",
+    "commit": "46c6834698c48bc4a463a86d8420f4eb1d7f3b75",
+    "packageVersion": "1.0.2",
+    "vendored": "src/ (without the six src/test helpers that import forge-std, solmate or OpenZeppelin, and without ProxyPoolManager), test/utils/{CurrencySettler,Constants,AmountHelpers,LiquidityAmounts}.sol, licenses/, README.md",
+    "remapping": "v4-core/=lib/v4-core/",
+    "license": "BUSL-1.1 (core), MIT (libraries, interfaces, types); see lib/v4-core/licenses/"
+  },
+  {
+    "repository": "foundry-rs/forge-std",
+    "tag": "v1.9.7",
+    "commit": "77041d2ce690e692d6e03cc812b57d1ddaa4d505",
+    "vendored": "src/, scripts/, LICENSE-APACHE, LICENSE-MIT, README.md, foundry.toml, package.json",
+    "remapping": "forge-std/=lib/forge-std/src/",
+    "license": "MIT OR Apache-2.0"
+  },
+  {
+    "repository": "transmissions11/solmate",
+    "commit": "89365b880c4f3c786bdd453d4b8e8fe410344a69",
+    "packageVersion": "6.8.0",
+    "vendored": "src/auth/Owned.sol (required by v4-core ProtocolFees, i.e. by the PoolManager used in tests), LICENSE",
+    "remapping": "solmate/=lib/solmate/",
+    "license": "AGPL-3.0-only"
+  }
+]
